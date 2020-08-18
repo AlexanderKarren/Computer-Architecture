@@ -65,6 +65,12 @@ but you'll have to implement those three above instructions first!
 * Read this whole file.
 * Skim the spec.
 
+ls8.py - loads the program into memory and runs it
+
+cpu.py - class that stores ram and register and has helper functions for the program
+
+print8.ls8 - prints 8 to the console
+
 ## Step 1: Add the constructor to `cpu.py`
 
 Add list properties to the `CPU` class to hold 256 bytes of memory and 8

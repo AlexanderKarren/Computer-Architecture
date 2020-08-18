@@ -18,15 +18,30 @@ class CPU:
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        if len(sys.argv) > 1:
+            file = open(sys.argv[1], 'r')
+            program = []
+            for instruction in file.read().split('\n'):
+                trimmed_instruction = ""
+                if len(instruction) >= 8:
+                    for i in range(8):
+                        if instruction[i] == '0' or instruction[i] == '1':
+                            trimmed_instruction += instruction[i]
+                instruction = trimmed_instruction
+                if len(instruction) > 0:
+                    # print(instruction)
+                    program.append(int(instruction, 2))
+            # print(program)
+        else:
+            program = [
+                # From print8.ls8
+                0b10000010, # LDI R0,8
+                0b00000000,
+                0b00001000,
+                0b01000111, # PRN R0
+                0b00000000,
+                0b00000001, # HLT
+            ]
 
         for instruction in program:
             self.ram[address] = instruction
@@ -80,6 +95,8 @@ class CPU:
         for i in range(len(self.ram)):
             ir[i] = self.ram[i]
 
+        print(ir)
+
         while running:
             # HLT
             if ir[self.pc] == 1:
@@ -88,6 +105,7 @@ class CPU:
             elif ir[self.pc] == 130:
                 self.ram_write(operand_a, operand_b)
                 op_size = 3
+            # PRN
             elif ir[self.pc] == 71:
                 print(self.ram_read(operand_a))
                 op_size = 2
