@@ -58,10 +58,15 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
-        if op == "ADD":
+        # LDI
+        if op == 130:
+            self.ram_write(reg_a, reg_b)
+        # PRN
+        elif op == 71:
+            print(self.ram_read(reg_a))
+        # ADD
+        elif op == 160:
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -87,8 +92,6 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        operand_a = self.ram[self.pc + 1]
-        operand_b = self.ram[self.pc + 2]
         op_size = 0
         running = True
         ir = [0] * 256
@@ -98,16 +101,13 @@ class CPU:
         print(ir)
 
         while running:
-            # HLT
+            operand_a = self.ram[self.pc + 1]
+            operand_b = self.ram[self.pc + 2]
+            op_size = (ir[self.pc] >> 6) + 1
+
             if ir[self.pc] == 1:
                 running = False
-            # LDI
-            elif ir[self.pc] == 130:
-                self.ram_write(operand_a, operand_b)
-                op_size = 3
-            # PRN
-            elif ir[self.pc] == 71:
-                print(self.ram_read(operand_a))
-                op_size = 2
+            else:
+                self.alu(ir[self.pc], operand_a, operand_b)
 
             self.pc += op_size
