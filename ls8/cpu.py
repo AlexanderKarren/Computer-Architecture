@@ -19,7 +19,11 @@ class CPU:
         # For now, we've just hardcoded a program:
 
         if len(sys.argv) > 1:
-            file = open(sys.argv[1], 'r')
+            try:
+                file = open(sys.argv[1], 'r')
+            except FileNotFoundError:
+                print(f"{sys.argv[1]} not found in local directory")
+                sys.exit(2)
             program = []
             for instruction in file.read().split('\n'):
                 trimmed_instruction = ""
@@ -32,6 +36,7 @@ class CPU:
                     # print(instruction)
                     program.append(int(instruction, 2))
             # print(program)
+            file.close()
         else:
             program = [
                 # From print8.ls8
@@ -68,7 +73,7 @@ class CPU:
         elif op == 160:
             self.reg[reg_a] += self.reg[reg_b]
         else:
-            raise Exception("Unsupported ALU operation")
+            raise Exception("Unsupported ALU operation:", op)
 
     def trace(self):
         """
@@ -98,7 +103,7 @@ class CPU:
         for i in range(len(self.ram)):
             ir[i] = self.ram[i]
 
-        print(ir)
+        # print(ir)
 
         while running:
             operand_a = self.ram[self.pc + 1]
