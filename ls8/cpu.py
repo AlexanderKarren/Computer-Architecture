@@ -63,21 +63,36 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
+        # NOT
+        if op == 105:
+            self.reg[reg_a] = ~self.reg[reg_a]
         # LDI
-        if op == 130:
+        elif op == 130:
             self.ram_write(reg_a, reg_b)
         # ADD
         elif op == 160:
             self.reg[reg_a] += self.reg[reg_b]
         # MUL
         elif op == 162:
-            product = 0
-            for i in range(self.ram_read(reg_b)):
-                product += self.ram_read(reg_a)
-            self.ram_write(reg_a, product)
+            self.reg[reg_a] *= self.reg[reg_b]
+        # MOD
+        elif op == 164:
+            self.reg[reg_a] %= self.reg[reg_b]
         # AND
         elif op == 168:
-            self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_b]
+            self.reg[reg_a] &= self.reg[reg_b]
+        # OR
+        elif op == 170:
+            self.reg[reg_a] |= self.reg[reg_b]
+        # XOR
+        elif op == 171:
+            self.reg[reg_a] ^= self.reg[reg_b]
+        # SHL
+        elif op == 172:
+            self.reg[reg_a] = self.reg[reg_a] << self.reg[reg_b]
+        # SHR
+        elif op == 173:
+            self.reg[reg_a] = self.reg[reg_a] >> self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation:", op)
 
@@ -117,8 +132,11 @@ class CPU:
             operand_b = self.ram[self.pc + 2]
             op_size = (op_code >> 6) + 1
 
+            # NOP
+            if op_code == 0:
+                pass
             # HLT
-            if op_code == 1:
+            elif op_code == 1:
                 running = False
             # CALL
             elif op_code == 80:

@@ -1,4 +1,4 @@
-# this should evaluate to 4
+# this should evaluate to 3
 
 10000010 # LDI R0,5
 00000000
@@ -6,7 +6,7 @@
 10000010 # LDI R1,6
 00000001
 00000110
-10101000 # AND R0,R1
+10101011 # XOR R0,R1
 00000000
 00000001
 01000111 # PRN R0
