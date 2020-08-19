@@ -23,7 +23,7 @@ class CPU:
                 file = open(sys.argv[1], 'r')
             except FileNotFoundError:
                 print(f"{sys.argv[1]} not found in local directory")
-                sys.exit(2)
+                sys.exit(1)
             program = []
             for instruction in file.read().split('\n'):
                 trimmed_instruction = ""
@@ -66,12 +66,18 @@ class CPU:
         # LDI
         if op == 130:
             self.ram_write(reg_a, reg_b)
-        # PRN
-        elif op == 71:
-            print(self.ram_read(reg_a))
         # ADD
         elif op == 160:
             self.reg[reg_a] += self.reg[reg_b]
+        # MUL
+        elif op == 162:
+            product = 0
+            for i in range(self.ram_read(reg_b)):
+                product += self.ram_read(reg_a)
+            self.ram_write(reg_a, product)
+        # AND
+        elif op == 168:
+            self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation:", op)
 
@@ -106,13 +112,27 @@ class CPU:
         # print(ir)
 
         while running:
+            op_code = ir[self.pc]
             operand_a = self.ram[self.pc + 1]
             operand_b = self.ram[self.pc + 2]
-            op_size = (ir[self.pc] >> 6) + 1
+            op_size = (op_code >> 6) + 1
 
-            if ir[self.pc] == 1:
+            # HLT
+            if op_code == 1:
                 running = False
+            # CALL
+            elif op_code == 80:
+                pass
+            # PUSH
+            elif op_code == 69:
+                pass
+            # POP
+            elif op_code == 70:
+                pass
+            # PRN
+            elif op_code == 71:
+                print(self.ram_read(operand_a))
             else:
-                self.alu(ir[self.pc], operand_a, operand_b)
+                self.alu(op_code, operand_a, operand_b)
 
             self.pc += op_size
