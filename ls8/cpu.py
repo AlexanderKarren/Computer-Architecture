@@ -118,6 +118,7 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
+        stack_pointer = len(self.ram) - 1
         op_size = 0
         running = True
         ir = [0] * 256
@@ -138,14 +139,18 @@ class CPU:
             # HLT
             elif op_code == 1:
                 running = False
-            # CALL
-            elif op_code == 80:
-                pass
             # PUSH
             elif op_code == 69:
-                pass
+                value = self.reg[operand_a]
+                stack_pointer -= 1
+                self.ram[stack_pointer] = value
             # POP
             elif op_code == 70:
+                value = self.ram[stack_pointer]
+                stack_pointer += 1
+                self.reg[operand_a] = value
+            # CALL
+            elif op_code == 80:
                 pass
             # PRN
             elif op_code == 71:
