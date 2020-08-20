@@ -10,6 +10,9 @@ class CPU:
         self.reg = [0] * 8
         self.ram = [0] * 256
         self.pc = 0
+        self.equal_flag = False
+        self.less_than_flag = False
+        self.greater_than_flag = False
 
     def load(self):
         """Load a program into memory."""
@@ -32,7 +35,7 @@ class CPU:
                         if instruction[i] == '0' or instruction[i] == '1':
                             trimmed_instruction += instruction[i]
                 instruction = trimmed_instruction
-                if len(instruction) > 0:
+                if len(instruction) == 8:
                     # print(instruction)
                     program.append(int(instruction, 2))
             # print(program)
@@ -78,6 +81,20 @@ class CPU:
         # MOD
         elif op == 164:
             self.reg[reg_a] %= self.reg[reg_b]
+        # CMP
+        elif op == 167:
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.equal_flag = True
+            else:
+                self.equal_flag = False
+            if self.reg[reg_a] < self.reg[reg_b]:
+                self.less_than_flag = True
+            else:
+                self.less_than_flag = False
+            if self.reg[reg_a] > self.reg[reg_b]:
+                self.greater_than_flag = True
+            else:
+                self.greater_than_flag = False
         # AND
         elif op == 168:
             self.reg[reg_a] &= self.reg[reg_b]
@@ -128,6 +145,8 @@ class CPU:
         # print(ir)
 
         while running:
+            # print(self.pc, "running op_code", ir[self.pc])
+            # print(self.pc, "program:", self.ram, "registers:", self.reg, ir[self.pc])
             op_code = ir[self.pc]
             operand_a = self.ram[self.pc + 1]
             operand_b = self.ram[self.pc + 2]
@@ -139,22 +158,50 @@ class CPU:
             # HLT
             elif op_code == 1:
                 running = False
+            # RET
+            elif op_code == 17:
+                address = self.ram[stack_pointer]
+                stack_pointer += 1
+                self.pc = address
             # PUSH
             elif op_code == 69:
-                value = self.reg[operand_a]
                 stack_pointer -= 1
+                value = self.reg[operand_a]
                 self.ram[stack_pointer] = value
             # POP
             elif op_code == 70:
                 value = self.ram[stack_pointer]
                 stack_pointer += 1
                 self.reg[operand_a] = value
-            # CALL
-            elif op_code == 80:
-                pass
             # PRN
             elif op_code == 71:
                 print(self.ram_read(operand_a))
+            # CALL
+            elif op_code == 80:
+                stack_pointer -= 1
+                self.ram[stack_pointer] = self.pc + 1
+                self.pc = self.reg[operand_a]
+                continue
+            # JMP
+            elif op_code == 84:
+                self.pc = self.reg[operand_a]
+                continue
+            # JEQ
+            elif op_code == 85:
+                if self.equal_flag is True:
+                    # print("jeq: jumping to", self.reg[operand_a], "op_code:", self.ram[self.reg[operand_a]])
+                    self.pc = self.reg[operand_a]
+                    continue
+                # else:
+                #     print("jeq: flag not true, not jumping")
+            # JNE
+            elif op_code == 86:
+                if self.equal_flag is False:
+                    # print("jne: jumping to", self.reg[operand_a], "op_code:", self.ram[self.reg[operand_a]])
+                    self.pc = self.reg[operand_a]
+                    continue
+                # else:
+                #     print("jne: flag not false, not jumping")
             else:
                 self.alu(op_code, operand_a, operand_b)
 
